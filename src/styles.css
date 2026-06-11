@@ -1113,3 +1113,226 @@ button,
     max-width: 100% !important;
   }
 }
+
+/* =========================================================
+   PEDIDOS MOBILE FINAL — cards reales, acciones visibles
+   ========================================================= */
+.pedidos-mobile-cards {
+  display: none;
+}
+
+.pedido-mobile-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  padding: 14px;
+  min-width: 0;
+  width: 100%;
+}
+
+.pedido-mobile-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.pedido-mobile-top h3 {
+  margin: 4px 0 2px;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+.pedido-mobile-top small,
+.pedido-mobile-index {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.pedido-mobile-section {
+  display: grid;
+  gap: 4px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border-soft);
+  min-width: 0;
+}
+
+.pedido-mobile-section.compact {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.pedido-mobile-section span,
+.pedido-mobile-money span,
+.pedido-mobile-section > span:first-child {
+  color: #667085;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pedido-mobile-section strong {
+  color: #243244;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.pedido-mobile-items {
+  display: grid;
+  gap: 7px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #344054;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.pedido-mobile-money {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.pedido-mobile-money > div {
+  display: grid;
+  gap: 3px;
+  padding: 11px;
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  background: #f8fafc;
+  min-width: 0;
+}
+
+.pedido-mobile-money strong {
+  color: var(--primary-dark);
+  font-size: 16px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.pedido-mobile-alert {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff4d6;
+  color: var(--warning);
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.pedido-mobile-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.pedido-mobile-actions .btn,
+.pedido-mobile-actions .btn-whatsapp,
+.pedido-mobile-actions button,
+.pedido-mobile-actions a {
+  width: 100% !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  line-height: 1.2 !important;
+  text-indent: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  border-radius: 14px !important;
+  text-decoration: none !important;
+}
+
+.pedido-mobile-actions .btn-whatsapp {
+  background: #e7f8ef !important;
+  color: #087443 !important;
+}
+
+.pedido-mobile-actions .btn-secondary {
+  background: #e8f0f7 !important;
+  color: var(--primary-dark) !important;
+}
+
+.pedido-mobile-actions .btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-2)) !important;
+  color: #ffffff !important;
+}
+
+.pedido-mobile-actions .btn-success {
+  background: #dcfae6 !important;
+  color: var(--success) !important;
+}
+
+.pedido-mobile-actions .btn-danger {
+  background: #fee4e2 !important;
+  color: var(--danger) !important;
+}
+
+@media (max-width: 760px) {
+  .pedidos-page .pedidos-desktop-table {
+    display: none !important;
+  }
+
+  .pedidos-mobile-cards {
+    display: grid !important;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .pedidos-page .panel {
+    padding-inline: 12px !important;
+  }
+
+  .pedidos-page .pagination-bottom {
+    margin-top: 14px;
+  }
+
+  .pedidos-page .status-select {
+    width: auto !important;
+    min-width: 118px !important;
+    max-width: 132px !important;
+    padding: 7px 28px 7px 11px !important;
+    font-size: 12px !important;
+  }
+
+  .pedido-mobile-card .inline-link {
+    color: var(--primary) !important;
+    font-weight: 950 !important;
+    text-decoration: none !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .pedido-mobile-money {
+    grid-template-columns: 1fr;
+  }
+
+  .pedido-mobile-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pedidos-page .status-select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

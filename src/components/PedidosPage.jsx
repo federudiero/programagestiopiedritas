@@ -560,7 +560,7 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
               </div>
             </div>
 
-            <div className="table-wrap compact-table responsive-table">
+            <div className="table-wrap compact-table responsive-table pedidos-desktop-table">
               <table>
                 <thead>
                   <tr>
@@ -625,6 +625,66 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
                   })}
                 </tbody>
               </table>
+            </div>
+
+            <div className="pedidos-mobile-cards">
+              {previewPagination.pageItems.map((pedido, index) => {
+                const resumen = getResumenPedido(pedido);
+                return (
+                  <article className="pedido-mobile-card" key={`mobile-${pedido.tempId}`}>
+                    <div className="pedido-mobile-top">
+                      <div>
+                        <span className="pedido-mobile-index">#{previewPagination.from + index}</span>
+                        <h3>{pedido.nombreCliente || "Sin nombre"}</h3>
+                        <small>{pedido.fechaStr || batchFechaStr}</small>
+                      </div>
+                      <RevisionBadge pedido={pedido} />
+                    </div>
+
+                    {(pedido.motivosRevision || []).length > 0 && (
+                      <div className="pedido-mobile-alert">{pedido.motivosRevision.join(" | ")}</div>
+                    )}
+
+                    <div className="pedido-mobile-section">
+                      <span>Teléfono</span>
+                      <strong>{pedido.telefono || "Sin teléfono"}</strong>
+                      <WhatsappLink phone={pedido.telefono} compact />
+                    </div>
+                    <div className="pedido-mobile-section">
+                      <span>Dirección</span>
+                      <strong>{pedido.direccion || "Sin dirección"}</strong>
+                    </div>
+                    <div className="pedido-mobile-section">
+                      <span>Pedido</span>
+                      <strong>{pedido.pedidoTexto || "Sin detalle"}</strong>
+                    </div>
+
+                    <div className="pedido-mobile-items">
+                      {(pedido.items || []).length ? pedido.items.map((item, itemIndex) => (
+                        <span key={`${pedido.tempId}-m-${item.productoId}-${itemIndex}`}>{item.cantidad} x {item.nombre}</span>
+                      )) : <span>Sin ítems detectados</span>}
+                    </div>
+
+                    <div className="pedido-mobile-money">
+                      <div><span>Productos</span><strong>{formatCurrency(resumen.totalCliente - resumen.envioCobrado)}</strong></div>
+                      <div><span>Envío</span><strong>{formatCurrency(resumen.envioCobrado)}</strong></div>
+                      <div><span>Total cliente</span><strong>{formatCurrency(resumen.totalCliente)}</strong></div>
+                    </div>
+
+                    <div className="pedido-mobile-section compact">
+                      <span>Vendedor</span>
+                      <strong>{pedido.vendedorNombre || "Sin vendedor"}</strong>
+                    </div>
+
+                    <div className="pedido-mobile-actions">
+                      <WhatsappLink phone={pedido.telefono} />
+                      <button type="button" className="btn btn-secondary" onClick={() => loadPreviewToForm(pedido)}>Corregir</button>
+                      <button type="button" className="btn btn-primary" onClick={() => saveOnePreview(pedido)}>Guardar</button>
+                      <button type="button" className="btn btn-success" onClick={() => saveOnePreview(pedido, "entregado")}>Guardar entregado</button>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </div>
         )}
@@ -766,7 +826,7 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
             <PaginationControls pagination={pedidosPagination} label="pedidos" />
           </div>
         </div>
-        <div className="table-wrap responsive-table">
+        <div className="table-wrap responsive-table pedidos-desktop-table">
           <table>
             <thead><tr><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Dirección</th><th>Pedido</th><th>Vendedor</th><th>Estado</th><th>Productos</th><th>Envío</th><th>Total</th><th>Ganancia</th><th>Acciones</th></tr></thead>
             <tbody>
@@ -809,6 +869,67 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
               ))}
             </tbody>
           </table>
+        </div>
+
+        <div className="pedidos-mobile-cards">
+          {pedidosPagination.pageItems.map((pedido) => (
+            <article className="pedido-mobile-card" key={`pedido-mobile-${pedido.id}`}>
+              <div className="pedido-mobile-top">
+                <div>
+                  <span className="pedido-mobile-index">{pedido.fechaStr || "Sin fecha"}</span>
+                  <h3>{pedido.nombreCliente || "Sin cliente"}</h3>
+                  <small>{pedido.vendedorNombre || "Sin vendedor"}</small>
+                </div>
+                <select
+                  className={`status-select status-${pedido.estado || "pendiente"}`}
+                  value={pedido.estado || "pendiente"}
+                  onChange={(event) => updatePedidoEstado(pedido, event.target.value)}
+                  aria-label="Cambiar estado del pedido"
+                >
+                  <option value="pendiente">Pendiente</option>
+                  <option value="entregado">Entregado</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+              </div>
+
+              {pedido.requiereRevision && <div className="pedido-mobile-alert">Revisar pedido</div>}
+
+              <div className="pedido-mobile-section">
+                <span>Teléfono</span>
+                <strong>{pedido.telefono || "Sin teléfono"}</strong>
+                <WhatsappLink phone={pedido.telefono} compact />
+              </div>
+              <div className="pedido-mobile-section">
+                <span>Dirección</span>
+                <strong>{pedido.direccion || "Sin dirección"}</strong>
+              </div>
+              <div className="pedido-mobile-section">
+                <span>Pedido</span>
+                <strong>{pedido.pedidoTexto || `${pedido.items?.length || 0} ítems`}</strong>
+              </div>
+
+              {(pedido.items || []).length > 0 && (
+                <div className="pedido-mobile-items">
+                  {pedido.items.map((item, itemIndex) => (
+                    <span key={`${pedido.id}-item-mobile-${item.productoId}-${itemIndex}`}>{item.cantidad} x {item.nombre}</span>
+                  ))}
+                </div>
+              )}
+
+              <div className="pedido-mobile-money">
+                <div><span>Productos</span><strong>{formatCurrency(pedido.subtotalProductos || pedido.totalVentaProductos || 0)}</strong></div>
+                <div><span>Envío</span><strong>{formatCurrency(pedido.envioCobrado || 0)}</strong></div>
+                <div><span>Total cliente</span><strong>{formatCurrency(pedido.totalCliente)}</strong></div>
+                <div><span>Ganancia</span><strong>{pedido.calculoCompleto === false ? "—" : formatCurrency(pedido.totalGanancia)}</strong></div>
+              </div>
+
+              <div className="pedido-mobile-actions">
+                <WhatsappLink phone={pedido.telefono} />
+                <button className="btn btn-secondary" type="button" onClick={() => editPedido(pedido)}>Editar</button>
+                <button className="btn btn-danger" type="button" onClick={() => handleDelete(pedido.id)}>Eliminar</button>
+              </div>
+            </article>
+          ))}
         </div>
         <PaginationControls pagination={pedidosPagination} label="pedidos" className="pagination-bottom" />
       </section>
