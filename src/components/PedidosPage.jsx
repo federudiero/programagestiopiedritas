@@ -201,13 +201,39 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
   const [itemCantidad, setItemCantidad] = useState(1);
   const [itemPagoEfectivo, setItemPagoEfectivo] = useState(false);
   const [itemPrecioManual, setItemPrecioManual] = useState("");
+  const [manualProductSearch, setManualProductSearch] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [filterEstado, setFilterEstado] = useState("todos");
   const [estadoOverrides, setEstadoOverrides] = useState({});
   const [activePedidoView, setActivePedidoView] = useState("carga");
 
   const productosActivos = useMemo(() => productos.filter((producto) => producto.activo !== false), [productos]);
-  const productoSeleccionado = productosActivos.find((producto) => producto.id === selectedProductId) || productosActivos[0] || null;
+  const productosManualFiltrados = useMemo(() => {
+    const query = manualProductSearch.trim().toLowerCase();
+    if (!query) return productosActivos;
+
+    return productosActivos.filter((producto) => {
+      const searchable = [
+        producto.nombre,
+        producto.codigo,
+        producto.familia,
+        ...(producto.aliases || []),
+      ].join(" ").toLowerCase();
+
+      return searchable.includes(query);
+    });
+  }, [manualProductSearch, productosActivos]);
+  const productoSeleccionado = useMemo(() => {
+    const selectedInFiltered = productosManualFiltrados.find((producto) => producto.id === selectedProductId);
+    if (selectedInFiltered) return selectedInFiltered;
+
+    if (!manualProductSearch.trim()) {
+      return productosActivos.find((producto) => producto.id === selectedProductId) || productosActivos[0] || null;
+    }
+
+    return productosManualFiltrados[0] || null;
+  }, [manualProductSearch, productosActivos, productosManualFiltrados, selectedProductId]);
+  const itemPreview = productoSeleccionado ? buildOrderItem(productoSeleccionado, itemCantidad, itemPagoEfectivo, itemPrecioManual) : null;
   const resumenForm = getResumenPedido(form);
   const totalVisible = resumenForm.totalCliente;
 
@@ -369,17 +395,33 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
   }
 
   function addItem() {
-    if (!productoSeleccionado) return;
-    const item = buildOrderItem(productoSeleccionado, itemCantidad, itemPagoEfectivo, itemPrecioManual);
-    if (!item) return;
+    setError("");
+    setSuccess("");
 
-    setForm((current) => ({
-      ...current,
-      items: [...current.items, item],
-    }));
+    if (!productoSeleccionado) {
+      setError("No hay producto seleccionado. Primero cargá productos en la sección Productos.");
+      return;
+    }
+
+    const item = buildOrderItem(productoSeleccionado, itemCantidad, itemPagoEfectivo, itemPrecioManual);
+    if (!item) {
+      setError("No se pudo agregar el producto. Revisá cantidad y precio.");
+      return;
+    }
+
+    setForm((current) => {
+      const nextItems = [...(current.items || []), item];
+      return {
+        ...current,
+        items: nextItems,
+        pedidoTexto: current.pedidoTexto?.trim() ? current.pedidoTexto : renderItems(nextItems),
+      };
+    });
     setItemCantidad(1);
     setItemPagoEfectivo(false);
     setItemPrecioManual("");
+    setManualProductSearch("");
+    setSuccess("Producto agregado al pedido.");
   }
 
   function removeItem(index) {
@@ -395,7 +437,12 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
     setSuccess("");
 
     try {
-      await savePedido({ ...form, id: editingId || undefined });
+      const pedidoToSave = {
+        ...form,
+        id: editingId || undefined,
+        pedidoTexto: form.pedidoTexto?.trim() || renderItems(form.items || []),
+      };
+      await savePedido(pedidoToSave);
       setForm({ ...emptyPedido, fechaStr: batchFechaStr || todayStr() });
       setRawText("");
       setEditingId(null);
@@ -594,19 +641,25 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
         </div>
 
         <form className="stack" onSubmit={handleSubmit}>
-          <div className="grid form-grid">
-            <label>Fecha carga<input type="date" value={form.fechaStr} onChange={(event) => updateField("fechaStr", event.target.value)} /></label>
-            <label>Fecha/turno entrega<input value={form.fechaEntrega} onChange={(event) => updateField("fechaEntrega", event.target.value)} placeholder="Jueves de 7 a 13" /></label>
-            <label>Estado<select value={form.estado} onChange={(event) => updateField("estado", event.target.value)}><option value="pendiente">Pendiente</option><option value="entregado">Entregado</option><option value="cancelado">Cancelado</option></select></label>
-            <label>Método pago<select value={form.metodoPago} onChange={(event) => updateField("metodoPago", event.target.value)}><option value="pendiente">Pendiente</option><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option><option value="mixto">Mixto</option><option value="cuentaCorriente">Cuenta corriente</option><option value="pagado">Pagado</option></select></label>
-            <label>Nombre cliente<input value={form.nombreCliente} onChange={(event) => updateField("nombreCliente", event.target.value)} /></label>
-            <label>Teléfono<input value={form.telefono} onChange={(event) => updateField("telefono", event.target.value)} /></label>
-            <label>Dirección<input value={form.direccion} onChange={(event) => updateField("direccion", event.target.value)} /></label>
-            <label>Vendedor<select value={form.vendedorId} onChange={(event) => handleVendedorChange(event.target.value)}><option value="">Sin vendedor</option>{vendedores.map((vendedor) => <option key={vendedor.id} value={vendedor.id}>{vendedor.nombre}</option>)}</select></label>
-            <label>Vendedor texto<input value={form.vendedorNombre} onChange={(event) => updateField("vendedorNombre", event.target.value)} placeholder="Si no está en la lista" /></label>
-            <label>Total cliente<input type="number" min="0" step="0.01" value={form.totalManual} onChange={(event) => updateField("totalManual", event.target.value)} placeholder="Total que paga el cliente" /></label>
-            <label>Envío cobrado<input type="number" min="0" step="0.01" value={form.envioCobrado} onChange={(event) => updateField("envioCobrado", event.target.value)} placeholder="Se calcula por diferencia si viene incluido" /></label>
-            <label>Requiere revisión<select value={form.requiereRevision ? "SI" : "NO"} onChange={(event) => updateField("requiereRevision", event.target.value === "SI")}><option value="NO">NO</option><option value="SI">SI</option></select></label>
+          <div className="manual-step-card">
+            <div>
+              <span className="step-badge">1</span>
+              <div>
+                <h3>Datos del cliente</h3>
+                <p className="muted">Cargá lo mínimo: nombre, teléfono, dirección y fecha. Después agregá productos desde el paso 2.</p>
+              </div>
+            </div>
+            <div className="grid form-grid">
+              <label>Fecha carga<input type="date" value={form.fechaStr} onChange={(event) => updateField("fechaStr", event.target.value)} /></label>
+              <label>Entrega / turno<input value={form.fechaEntrega} onChange={(event) => updateField("fechaEntrega", event.target.value)} placeholder="Jueves de 7 a 13" /></label>
+              <label>Estado<select value={form.estado} onChange={(event) => updateField("estado", event.target.value)}><option value="pendiente">Pendiente</option><option value="entregado">Entregado</option><option value="cancelado">Cancelado</option></select></label>
+              <label>Método pago<select value={form.metodoPago} onChange={(event) => updateField("metodoPago", event.target.value)}><option value="pendiente">Pendiente</option><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option><option value="mixto">Mixto</option><option value="cuentaCorriente">Cuenta corriente</option><option value="pagado">Pagado</option></select></label>
+              <label>Nombre cliente<input value={form.nombreCliente} onChange={(event) => updateField("nombreCliente", event.target.value)} placeholder="Ej: Marcos" /></label>
+              <label>Teléfono<input value={form.telefono} onChange={(event) => updateField("telefono", event.target.value)} placeholder="Ej: +54 9 351..." /></label>
+              <label className="wide-field">Dirección<input value={form.direccion} onChange={(event) => updateField("direccion", event.target.value)} placeholder="Calle, número, barrio o link" /></label>
+              <label>Vendedor<select value={form.vendedorId} onChange={(event) => handleVendedorChange(event.target.value)}><option value="">Sin vendedor</option>{vendedores.map((vendedor) => <option key={vendedor.id} value={vendedor.id}>{vendedor.nombre}</option>)}</select></label>
+              <label>Vendedor texto<input value={form.vendedorNombre} onChange={(event) => updateField("vendedorNombre", event.target.value)} placeholder="Si no está en la lista" /></label>
+            </div>
           </div>
 
           {form.motivosRevision?.length > 0 && (
@@ -615,37 +668,82 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
             </div>
           )}
 
-          <label>Detalle del pedido<textarea rows="3" value={form.pedidoTexto} onChange={(event) => updateField("pedidoTexto", event.target.value)} /></label>
-          <label>Observaciones<textarea rows="2" value={form.observaciones} onChange={(event) => updateField("observaciones", event.target.value)} /></label>
-
-          <div className="subpanel">
-            <h3>Ítems calculables</h3>
-            <div className="grid item-grid">
-              <label>Producto<select value={productoSeleccionado?.id || ""} onChange={(event) => setSelectedProductId(event.target.value)}>{productosActivos.map((producto) => <option key={producto.id} value={producto.id}>{producto.nombre}</option>)}</select></label>
-              <label>Cantidad<input type="number" min="1" value={itemCantidad} onChange={(event) => setItemCantidad(event.target.value)} /></label>
-              <label>Efectivo<select value={itemPagoEfectivo ? "SI" : "NO"} onChange={(event) => setItemPagoEfectivo(event.target.value === "SI")}><option value="NO">NO</option><option value="SI">SI</option></select></label>
-              <label>Precio manual unit.<input type="number" min="0" step="0.01" value={itemPrecioManual} onChange={(event) => setItemPrecioManual(event.target.value)} /></label>
-              <button type="button" className="btn btn-secondary align-end" onClick={addItem}>Agregar ítem</button>
+          <div className="manual-step-card product-builder-card">
+            <div>
+              <span className="step-badge">2</span>
+              <div>
+                <h3>Agregar productos al pedido</h3>
+                <p className="muted">Buscá el producto, poné cantidad y tocá <strong>Agregar producto</strong>. El sistema calcula precio, costo, comisión y ganancia.</p>
+              </div>
             </div>
 
-            {form.items.length > 0 && (
-              <div className="table-wrap compact-table responsive-table">
+            <div className="grid manual-product-grid">
+              <label className="wide-field">
+                Buscar producto
+                <input
+                  value={manualProductSearch}
+                  onChange={(event) => setManualProductSearch(event.target.value)}
+                  placeholder="Ej: blanca, gris oscuro, barral 1.60, arena fina..."
+                />
+              </label>
+              <label className="wide-field">
+                Producto seleccionado
+                <select value={productoSeleccionado?.id || ""} onChange={(event) => setSelectedProductId(event.target.value)}>
+                  {productosManualFiltrados.length === 0 && <option value="">Sin coincidencias</option>}
+                  {productosManualFiltrados.map((producto) => <option key={producto.id} value={producto.id}>{producto.nombre} {producto.codigo ? `· ${producto.codigo}` : ""}</option>)}
+                </select>
+              </label>
+              <label>
+                Cantidad
+                <input type="number" min="1" value={itemCantidad} onChange={(event) => setItemCantidad(event.target.value)} />
+              </label>
+              <label>
+                Pago efectivo
+                <select value={itemPagoEfectivo ? "SI" : "NO"} onChange={(event) => setItemPagoEfectivo(event.target.value === "SI")}><option value="NO">NO</option><option value="SI">SI</option></select>
+              </label>
+              <label>
+                Precio manual unitario opcional
+                <input type="number" min="0" step="0.01" value={itemPrecioManual} onChange={(event) => setItemPrecioManual(event.target.value)} placeholder="Vacío = precio automático" />
+              </label>
+              <button type="button" className="btn btn-primary align-end" onClick={addItem}>Agregar producto</button>
+            </div>
+
+            {itemPreview && (
+              <div className="manual-item-preview">
+                <div><small>Precio unit.</small><strong>{formatCurrency(itemPreview.precioClienteUnitario)}</strong></div>
+                <div><small>Total producto</small><strong>{formatCurrency(itemPreview.ventaTotal)}</strong></div>
+                <div><small>Costo + comisión</small><strong>{formatCurrency(itemPreview.costoTotal)}</strong></div>
+                <div><small>Ganancia</small><strong>{formatCurrency(itemPreview.gananciaTotal)}</strong></div>
+              </div>
+            )}
+
+            {form.items.length > 0 ? (
+              <div className="table-wrap compact-table responsive-table items-table-wrap">
                 <table>
-                  <thead><tr><th>Producto</th><th>Cant.</th><th>Precio cliente</th><th>Total productos</th><th>Ganancia</th><th>Texto detectado</th><th></th></tr></thead>
-                  <tbody>{form.items.map((item, index) => <tr key={`${item.productoId}-${index}`}><td data-label="Producto">{item.nombre}</td><td data-label="Cant.">{item.cantidad}</td><td data-label="Precio cliente">{formatCurrency(item.precioClienteUnitario)}</td><td data-label="Total productos">{formatCurrency(item.ventaTotal)}</td><td data-label="Ganancia">{formatCurrency(item.gananciaTotal)}</td><td data-label="Texto detectado">{item.textoOriginal || "—"}</td><td data-label="Acciones"><button type="button" className="btn btn-danger" onClick={() => removeItem(index)}>Quitar</button></td></tr>)}</tbody>
+                  <thead><tr><th>Producto</th><th>Cant.</th><th>Precio cliente</th><th>Total productos</th><th>Ganancia</th><th></th></tr></thead>
+                  <tbody>{form.items.map((item, index) => <tr key={`${item.productoId}-${index}`}><td data-label="Producto">{item.nombre}</td><td data-label="Cant.">{item.cantidad}</td><td data-label="Precio cliente">{formatCurrency(item.precioClienteUnitario)}</td><td data-label="Total productos">{formatCurrency(item.ventaTotal)}</td><td data-label="Ganancia">{formatCurrency(item.gananciaTotal)}</td><td data-label="Acciones"><button type="button" className="btn btn-danger" onClick={() => removeItem(index)}>Quitar</button></td></tr>)}</tbody>
                 </table>
               </div>
+            ) : (
+              <div className="empty-manual-items">Todavía no agregaste productos. Este paso es necesario para que el pedido calcule costos, comisión y ganancia.</div>
             )}
           </div>
 
-          <div className="summary-grid">
-            <SummaryCard label="Venta productos" value={formatCurrency(resumenForm.totalCliente - resumenForm.envioCobrado)} tone="success" />
-            <SummaryCard label="Envío cobrado" value={formatCurrency(resumenForm.envioCobrado)} />
-            <SummaryCard label="Total cliente" value={formatCurrency(totalVisible)} tone="success" />
-            <SummaryCard label="Costo productos" value={formatCurrency(resumenForm.totalCosto)} />
-            <SummaryCard label="Comisión" value={formatCurrency(resumenForm.totalComision)} />
-            <SummaryCard label="Ganancia productos" value={formatCurrency(resumenForm.totalGanancia)} tone="success" />
-            <SummaryCard label="Margen productos" value={resumenForm.totalCosto > 0 ? formatPercent(resumenForm.totalGanancia / resumenForm.totalCosto) : "—"} />
+          <div className="manual-step-card">
+            <div>
+              <span className="step-badge">3</span>
+              <div>
+                <h3>Total, envío y notas</h3>
+                <p className="muted">Si dejás el total vacío, se calcula con productos + envío. Si cobrás un total cerrado, cargalo en “Total cobrado”.</p>
+              </div>
+            </div>
+            <div className="grid form-grid">
+              <label>Total cobrado al cliente<input type="number" min="0" step="0.01" value={form.totalManual} onChange={(event) => updateField("totalManual", event.target.value)} placeholder="Opcional" /></label>
+              <label>Envío cobrado<input type="number" min="0" step="0.01" value={form.envioCobrado} onChange={(event) => updateField("envioCobrado", event.target.value)} placeholder="Ej: 5000" /></label>
+              <label>Requiere revisión<select value={form.requiereRevision ? "SI" : "NO"} onChange={(event) => updateField("requiereRevision", event.target.value === "SI")}><option value="NO">NO</option><option value="SI">SI</option></select></label>
+              <label className="wide-field">Detalle del pedido<textarea rows="3" value={form.pedidoTexto} onChange={(event) => updateField("pedidoTexto", event.target.value)} placeholder="Se completa solo si agregás productos. También podés escribir algo manual." /></label>
+              <label className="wide-field">Observaciones<textarea rows="2" value={form.observaciones} onChange={(event) => updateField("observaciones", event.target.value)} placeholder="Ej: dejar en puerta, paga antes, retiro, etc." /></label>
+            </div>
           </div>
 
           <div className="actions">

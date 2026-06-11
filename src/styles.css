@@ -496,3 +496,620 @@ td { color: #344054; }
   .pedido-mode-switch button { width: 100%; }
   .quick-steps { grid-template-columns: 1fr; }
 }
+
+/* Carga manual de pedidos: flujo claro por pasos */
+.manual-step-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: var(--shadow-soft);
+}
+.manual-step-card > div:first-child {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.manual-step-card h3 { margin: 0; }
+.step-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: #fff;
+  font-weight: 950;
+}
+.wide-field { grid-column: span 2; }
+.manual-product-grid {
+  grid-template-columns: minmax(220px, 1.3fr) minmax(240px, 1.6fr) 120px 140px minmax(180px, 1fr) auto;
+  align-items: end;
+}
+.manual-item-preview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(145px, 1fr));
+  gap: 10px;
+}
+.manual-item-preview > div {
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  background: #fff;
+}
+.manual-item-preview small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  margin-bottom: 3px;
+}
+.manual-item-preview strong {
+  color: var(--primary-dark);
+  font-size: 17px;
+}
+.empty-manual-items {
+  padding: 14px;
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  color: var(--muted);
+  background: #fff;
+  font-weight: 800;
+}
+.items-table-wrap table { min-width: 820px; }
+
+@media (max-width: 920px) {
+  .manual-product-grid { grid-template-columns: 1fr 1fr; }
+  .manual-item-preview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wide-field { grid-column: span 2; }
+}
+
+@media (max-width: 640px) {
+  .manual-step-card { padding: 14px; }
+  .manual-step-card > div:first-child { align-items: center; }
+  .manual-product-grid { grid-template-columns: 1fr; }
+  .manual-item-preview { grid-template-columns: 1fr; }
+  .wide-field { grid-column: span 1; }
+}
+/* =========================================================
+   FIX GLOBAL RESPONSIVE / OVERFLOW
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+}
+
+/* Layout principal */
+.app-shell,
+.app-layout,
+.layout,
+.dashboard-shell {
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+/* Contenedor principal al lado del sidebar */
+.main-shell,
+.main-content,
+.page-shell,
+.content-shell,
+.app-main,
+main {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Cards y paneles */
+.card,
+.panel,
+.page-card,
+.section-card,
+.table-card,
+.content-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Header superior */
+.topbar,
+.page-header,
+.header-card {
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+/* Tabs / botones superiores */
+.tabs,
+.page-tabs,
+.pedidos-tabs,
+.segmented-tabs,
+.action-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.tabs button,
+.page-tabs button,
+.pedidos-tabs button,
+.segmented-tabs button,
+.action-tabs button {
+  white-space: nowrap;
+}
+
+/* Tablas */
+.table-wrapper,
+.table-scroll,
+.table-responsive,
+.list-table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  vertical-align: top;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Evita columnas exageradamente angostas */
+td,
+th {
+  min-width: 90px;
+}
+
+/* Columnas largas */
+td:nth-child(4),
+td:nth-child(5) {
+  min-width: 220px;
+}
+
+/* Acciones */
+td:last-child,
+th:last-child {
+  min-width: 130px;
+}
+
+/* Botones dentro de tablas */
+td button,
+td a {
+  white-space: nowrap;
+}
+
+/* Responsive mobile */
+@media (max-width: 900px) {
+  .app-shell,
+  .app-layout,
+  .layout,
+  .dashboard-shell {
+    display: block;
+  }
+
+  .sidebar {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .main-shell,
+  .main-content,
+  .page-shell,
+  .content-shell,
+  .app-main,
+  main {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .topbar,
+  .page-header,
+  .header-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .tabs,
+  .page-tabs,
+  .pedidos-tabs,
+  .segmented-tabs,
+  .action-tabs {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .tabs button,
+  .page-tabs button,
+  .pedidos-tabs button,
+  .segmented-tabs button,
+  .action-tabs button {
+    flex: 0 0 auto;
+  }
+
+  .table-wrapper,
+  .table-scroll,
+  .table-responsive,
+  .list-table-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 900px;
+  }
+}
+/* =========================================================
+   RESPONSIVE STABILITY PATCH — evita desbordes globales
+   Mantiene el scroll solo dentro de tablas/listados.
+   ========================================================= */
+
+html,
+body,
+#root {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100% !important;
+  overflow-x: hidden !important;
+}
+
+body {
+  overscroll-behavior-x: none;
+}
+
+.layout-shell {
+  width: 100% !important;
+  max-width: 100vw !important;
+  min-width: 0 !important;
+  overflow-x: clip !important;
+}
+
+.app-shell {
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin-left: var(--sidebar-width) !important;
+  padding: 94px clamp(12px, 1.7vw, 28px) 48px !important;
+  overflow-x: clip !important;
+}
+
+.app-shell > *,
+.stack,
+.panel,
+.subpanel,
+.page-hero,
+.page-hero > *,
+.status-box,
+.summary-grid,
+.manual-step-card,
+.pedidos-page,
+.quick-order-panel,
+.batch-preview,
+.product-builder-card {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.panel,
+.subpanel,
+.manual-step-card,
+.page-hero > div:first-child,
+.status-box {
+  overflow: hidden !important;
+}
+
+.topbar {
+  left: calc(var(--sidebar-width) + clamp(10px, 1.4vw, 20px)) !important;
+  right: clamp(10px, 1.4vw, 20px) !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  overflow: hidden !important;
+}
+
+.brand-block,
+.topbar-center,
+.topbar-actions,
+.panel-header,
+.section-title-row,
+.row-actions,
+.actions,
+.button-row,
+.list-toolbar {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.topbar-actions,
+.row-actions,
+.actions,
+.button-row,
+.list-toolbar {
+  flex-wrap: wrap !important;
+}
+
+/* El encabezado de Pedidos no debe empujar la página hacia la derecha */
+.pedidos-command-center {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  overflow: hidden !important;
+}
+
+.pedido-mode-switch {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-start !important;
+  overflow: visible !important;
+}
+
+.pedido-mode-switch button {
+  flex: 1 1 180px !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+/* Tablas: nunca agrandan el documento completo */
+.table-wrap,
+.table-wrapper,
+.table-scroll,
+.table-responsive,
+.list-table-wrapper,
+.items-table-wrap {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-x: contain;
+}
+
+.table-wrap table,
+.table-wrapper table,
+.table-scroll table,
+.table-responsive table,
+.list-table-wrapper table,
+.items-table-wrap table {
+  width: max-content !important;
+  min-width: min(1120px, 100%) !important;
+  max-width: none !important;
+}
+
+.compact-table table {
+  min-width: min(980px, 100%) !important;
+}
+
+.pedidos-page .table-wrap table {
+  min-width: 1180px !important;
+}
+
+th,
+td {
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: auto;
+}
+
+.pedidos-page td[data-label="Dirección"],
+.pedidos-page td[data-label="Pedido"],
+.pedidos-page td[data-label="Ítems"],
+.pedidos-page td[data-label="Cliente"] {
+  min-width: 190px !important;
+  max-width: 320px !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+.pedidos-page td[data-label="Acciones"] {
+  min-width: 150px !important;
+}
+
+/* Formularios: campos largos no rompen el ancho */
+.form-grid,
+.calc-grid,
+.quick-order-grid,
+.manual-product-grid,
+.item-grid,
+.price-tier-row {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+input,
+select,
+textarea,
+button,
+.btn {
+  max-width: 100% !important;
+}
+
+/* Desktop chico / tablet */
+@media (max-width: 1180px) {
+  .app-shell {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 88px 14px 40px !important;
+  }
+
+  .topbar {
+    left: 10px !important;
+    right: 10px !important;
+  }
+
+  .sidebar {
+    width: min(86vw, 310px) !important;
+    max-width: 310px !important;
+  }
+}
+
+/* Tablet y móvil: el topbar no debe quedar como columna gigante */
+@media (max-width: 900px) {
+  .topbar {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .main-shell,
+  .main-content,
+  .page-shell,
+  .content-shell,
+  .app-main,
+  main {
+    padding: 0 !important;
+  }
+
+  .page-hero {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    padding: 78px 10px 28px !important;
+  }
+
+  .topbar {
+    min-height: 54px !important;
+    border-radius: 16px !important;
+  }
+
+  .topbar-actions {
+    justify-content: flex-end !important;
+  }
+
+  .topbar-actions .btn-dark {
+    padding-inline: 10px !important;
+  }
+
+  .pedidos-command-center,
+  .panel,
+  .subpanel,
+  .manual-step-card {
+    border-radius: 16px !important;
+  }
+
+  .pedido-mode-switch {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .pedido-mode-switch button {
+    width: 100% !important;
+    flex: none !important;
+  }
+
+  .panel-header,
+  .section-title-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+  }
+
+  .row-actions,
+  .actions,
+  .button-row,
+  .list-toolbar,
+  .batch-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+  }
+
+  .row-actions > *,
+  .actions > *,
+  .button-row > *,
+  .list-toolbar > *,
+  .batch-actions > * {
+    width: 100% !important;
+  }
+
+  .responsive-table {
+    overflow: visible !important;
+  }
+
+  .responsive-table table,
+  .responsive-table thead,
+  .responsive-table tbody,
+  .responsive-table th,
+  .responsive-table td,
+  .responsive-table tr {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .responsive-table table {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .responsive-table thead {
+    display: none !important;
+  }
+
+  .responsive-table tr {
+    margin-bottom: 12px !important;
+  }
+
+  .responsive-table td {
+    overflow-wrap: anywhere !important;
+  }
+
+  .pedidos-page td[data-label="Dirección"],
+  .pedidos-page td[data-label="Pedido"],
+  .pedidos-page td[data-label="Ítems"],
+  .pedidos-page td[data-label="Cliente"],
+  .pedidos-page td[data-label="Acciones"] {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
