@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email == "federudiero@gmail.com";
+    }
+
+    match /productosCalculadora/{id} { allow read, create, update, delete: if isOwner(); }
+    match /pedidos/{id} { allow read, create, update, delete: if isOwner(); }
+    match /clientes/{id} { allow read, create, update, delete: if isOwner(); }
+    match /vendedores/{id} { allow read, create, update, delete: if isOwner(); }
+    match /backups/{id} { allow read, create, update, delete: if isOwner(); }
+    match /cajaMovimientos/{id} { allow read, create, update, delete: if isOwner(); }
+    match /stockMovimientos/{id} { allow read, create, update, delete: if isOwner(); }
+    match /comisionesLiquidaciones/{id} { allow read, create, update, delete: if isOwner(); }
+    match /cuentasCorrientes/{id} { allow read, create, update, delete: if isOwner(); }
+    match /auditoria/{id} { allow read, create, update, delete: if isOwner(); }
+    match /zonasEnvio/{id} { allow read, create, update, delete: if isOwner(); }
+
+    match /cuentas/{cuentaId}/{collectionName}/{id} {
+      allow read, create, update, delete: if isOwner()
+        && collectionName in [
+          "productosCalculadora", "pedidos", "clientes", "vendedores", "backups",
+          "cajaMovimientos", "stockMovimientos", "comisionesLiquidaciones",
+          "cuentasCorrientes", "auditoria", "zonasEnvio"
+        ];
+    }
+  }
+}

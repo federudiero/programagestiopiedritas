@@ -1,0 +1,60 @@
+[
+  {
+    "codigo": "PIEDRA-BLANCA",
+    "nombre": "Piedra blanca",
+    "familia": "Piedras",
+    "unidad": "bolsa 20 kg",
+    "costoMaterialUnitario": 1900,
+    "comision": { "tipo": "fija", "valor": 700 },
+    "descuentoEfectivo": { "aplica": false, "porcentaje": 0 },
+    "precios": [
+      { "desde": 1, "precioUnitario": 5900 },
+      { "desde": 10, "precioUnitario": 5500 },
+      { "desde": 20, "precioUnitario": 5100 }
+    ],
+    "activo": true
+  },
+  {
+    "codigo": "PIEDRA-GRIS-CLARO",
+    "nombre": "Piedra gris claro",
+    "familia": "Piedras",
+    "unidad": "bolsa 20 kg",
+    "costoMaterialUnitario": 950,
+    "comision": { "tipo": "fija", "valor": 600 },
+    "descuentoEfectivo": { "aplica": false, "porcentaje": 0 },
+    "precios": [
+      { "desde": 1, "precioUnitario": 4800 },
+      { "desde": 10, "precioUnitario": 4400 },
+      { "desde": 20, "precioUnitario": 3900 }
+    ],
+    "activo": true
+  },
+  {
+    "codigo": "PIEDRA-GRIS-OSCURO",
+    "nombre": "Piedra gris oscuro",
+    "familia": "Piedras",
+    "unidad": "bolsa 20 kg",
+    "costoMaterialUnitario": 1650,
+    "comision": { "tipo": "fija", "valor": 600 },
+    "descuentoEfectivo": { "aplica": false, "porcentaje": 0 },
+    "precios": [
+      { "desde": 1, "precioUnitario": 5200 },
+      { "desde": 10, "precioUnitario": 4800 },
+      { "desde": 20, "precioUnitario": 4400 }
+    ],
+    "activo": true
+  },
+  {
+    "codigo": "2206",
+    "nombre": "Barral madera 22 mm x 1,60 m",
+    "familia": "Barrales madera",
+    "unidad": "unidad",
+    "costoMaterialUnitario": 4844,
+    "comision": { "tipo": "porcentaje", "valor": 12 },
+    "descuentoEfectivo": { "aplica": true, "porcentaje": 10 },
+    "precios": [
+      { "desde": 1, "precioUnitario": 11700 }
+    ],
+    "activo": true
+  }
+]
