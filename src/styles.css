@@ -408,3 +408,91 @@ td { color: #344054; }
     letter-spacing: 0.04em;
   }
 }
+
+/* Pedido UX simplificado */
+.pedidos-command-center {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 22px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(237,246,251,0.96));
+  border: 1px solid rgba(216,226,236,0.95);
+  box-shadow: var(--shadow-soft);
+}
+.pedidos-command-center h2 { margin: 0; font-size: clamp(24px, 2.4vw, 34px); letter-spacing: -0.04em; }
+.pedidos-command-center p { margin: 8px 0 0; color: var(--muted); line-height: 1.55; }
+.pedido-mode-switch {
+  display: inline-flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 18px;
+  background: #e8f0f7;
+  border: 1px solid var(--border);
+}
+.pedido-mode-switch button {
+  border: 0;
+  border-radius: 14px;
+  padding: 10px 13px;
+  color: var(--primary-dark);
+  background: transparent;
+  font-weight: 950;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pedido-mode-switch button.active {
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  box-shadow: 0 10px 18px rgba(15, 91, 133, 0.18);
+}
+.quick-order-panel textarea {
+  min-height: 190px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.quick-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.quick-steps div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  background: #f8fafc;
+  color: var(--primary-dark);
+  font-weight: 900;
+}
+.quick-steps strong {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+}
+.login-diagnostics {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #f8fafc;
+}
+.login-diagnostics span,
+.login-diagnostics small { color: var(--muted); }
+.login-diagnostics strong { color: var(--primary-dark); word-break: break-word; }
+
+@media (max-width: 860px) {
+  .pedidos-command-center { grid-template-columns: 1fr; padding: 16px; }
+  .pedido-mode-switch { display: grid; grid-template-columns: 1fr; width: 100%; }
+  .pedido-mode-switch button { width: 100%; }
+  .quick-steps { grid-template-columns: 1fr; }
+}

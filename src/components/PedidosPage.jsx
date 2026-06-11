@@ -204,6 +204,7 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
   const [editingId, setEditingId] = useState(null);
   const [filterEstado, setFilterEstado] = useState("todos");
   const [estadoOverrides, setEstadoOverrides] = useState({});
+  const [activePedidoView, setActivePedidoView] = useState("carga");
 
   const productosActivos = useMemo(() => productos.filter((producto) => producto.activo !== false), [productos]);
   const productoSeleccionado = productosActivos.find((producto) => producto.id === selectedProductId) || productosActivos[0] || null;
@@ -281,6 +282,7 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
       envioCobrado: pedido.envioCobrado || "",
     }));
     setEditingId(null);
+    setActivePedidoView("manual");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -296,6 +298,7 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
       await savePedido(pedidoToSave);
       setBatchPreview((current) => current.filter((item) => item.tempId !== pedido.tempId));
       await onRefresh();
+      setActivePedidoView("listado");
       setSuccess(estadoOverride === "entregado" ? "Pedido guardado como entregado." : "Pedido guardado desde la vista previa.");
     } catch (error) {
       setError(error.message || "No se pudo guardar el pedido.");
@@ -321,6 +324,7 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
       setBatchPreview([]);
       setRawText("");
       await onRefresh();
+      setActivePedidoView("listado");
       setSuccess(`${cantidad} pedidos guardados correctamente${estadoOverride === "entregado" ? " como entregados" : ""}.`);
     } catch (error) {
       setError(error.message || "No se pudieron guardar todos los pedidos.");
@@ -395,6 +399,7 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
       setForm({ ...emptyPedido, fechaStr: batchFechaStr || todayStr() });
       setRawText("");
       setEditingId(null);
+      setActivePedidoView("listado");
       await onRefresh();
       setSuccess(editingId ? "Pedido actualizado." : "Pedido guardado.");
     } catch (error) {
@@ -420,6 +425,7 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
     setEditingId(pedido.id);
     setForm({ ...emptyPedido, ...pedido, items: pedido.items || [] });
     setRawText(pedido.rawText || "");
+    setActivePedidoView("manual");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -438,12 +444,33 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
 
   return (
     <div className="stack pedidos-page">
-      <section className="panel">
+      <section className="pedidos-command-center">
+        <div>
+          <p className="eyebrow">Pedidos</p>
+          <h2>Cargá pedidos en 3 pasos</h2>
+          <p>Elegí fecha, pegá el texto del vendedor, procesá y guardá desde la vista previa. La carga manual queda en modo avanzado para correcciones.</p>
+        </div>
+        <div className="pedido-mode-switch" role="tablist" aria-label="Modo de pedidos">
+          <button type="button" className={activePedidoView === "carga" ? "active" : ""} onClick={() => setActivePedidoView("carga")}>Carga rápida</button>
+          <button type="button" className={activePedidoView === "manual" ? "active" : ""} onClick={() => setActivePedidoView("manual")}>Manual / corregir</button>
+          <button type="button" className={activePedidoView === "listado" ? "active" : ""} onClick={() => setActivePedidoView("listado")}>Pedidos cargados</button>
+        </div>
+      </section>
+
+      {activePedidoView === "carga" && (
+      <section className="panel quick-order-panel">
         <div className="panel-header">
           <div>
             <p className="eyebrow">Carga rápida</p>
-            <h2>Leer pedido desde texto</h2>
+            <h2>Pegá pedidos y guardá directo</h2>
           </div>
+          <button type="button" className="btn btn-secondary" onClick={() => setActivePedidoView("manual")}>Abrir carga manual</button>
+        </div>
+
+        <div className="quick-steps">
+          <div><strong>1</strong><span>Fecha y estado</span></div>
+          <div><strong>2</strong><span>Pegar texto</span></div>
+          <div><strong>3</strong><span>Procesar y guardar</span></div>
         </div>
 
         <div className="grid quick-order-grid">
@@ -466,8 +493,8 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
           <textarea rows="7" value={rawText} onChange={(event) => setRawText(event.target.value)} placeholder="=== PEDIDO ===\n👤 Nombre: ...\n📌 Dirección: ...\n📱 Teléfono: ...\n📝 Pedido: ...\n💰 Total: ..." />
         </label>
         <div className="actions left batch-actions">
-          <button type="button" className="btn btn-secondary" onClick={handleParse}>Leer 1 pedido y completar formulario</button>
-          <button type="button" className="btn btn-primary" onClick={handleParseBatch}>Procesar varios pedidos</button>
+          <button type="button" className="btn btn-secondary" onClick={handleParse}>Leer 1 pedido</button>
+          <button type="button" className="btn btn-primary" onClick={handleParseBatch}>Procesar pedidos</button>
           <button type="button" className="btn btn-secondary" onClick={handlePrintBatchReport} disabled={!batchPreview.length}>Imprimir PDF vista previa</button>
         </div>
 
@@ -555,12 +582,14 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
           </div>
         )}
       </section>
+      )}
 
+      {(activePedidoView === "manual" || editingId) && (
       <section className="panel">
         <div className="panel-header">
           <div>
-            <p className="eyebrow">Pedidos</p>
-            <h2>{editingId ? "Editar pedido" : "Nuevo pedido"}</h2>
+            <p className="eyebrow">Modo avanzado</p>
+            <h2>{editingId ? "Editar pedido" : "Carga manual / corrección"}</h2>
           </div>
         </div>
 
@@ -626,7 +655,9 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
           </div>
         </form>
       </section>
+      )}
 
+      {activePedidoView === "listado" && (
       <section className="panel">
         <div className="panel-header">
           <div><p className="eyebrow">Listado</p><h2>Pedidos cargados</h2></div>
@@ -683,6 +714,7 @@ export default function PedidosPage({ productos, vendedores, pedidos, onRefresh,
         </div>
         <PaginationControls pagination={pedidosPagination} label="pedidos" className="pagination-bottom" />
       </section>
+      )}
     </div>
   );
 }
